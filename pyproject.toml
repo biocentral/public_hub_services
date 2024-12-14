@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "public-hub-services"
+version = "0.1.0"
+description = "Microservice to provide open functionality for the biocentral hub server"
+authors = ["Sebastian <sebastian.franz@tum.de>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.11"
+redis = "^5.2.1"
+pandas = "^2.2.3"
+flask = "^3.1.0"
+gunicorn = "^23.0.0"
+numpy = "^2.2.0"
+pyyaml = "^6.0.2"
+
+# Git-Dependencies
+autoeval = {git = "https://github.com/J-SNACKKB/autoeval.git", branch = "update-biotrainer"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
