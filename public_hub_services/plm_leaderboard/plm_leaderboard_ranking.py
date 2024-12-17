@@ -15,13 +15,13 @@ def _ascending_metrics():
     return ['loss', 'rmse', 'mse', 'mae', 'mean_squared_error', 'mean_absolute_error']
 
 
-def _get_recommended_metrics():
+def get_recommended_metrics():
     return {dataset: values["recommended_evaluation_metric"] for dataset, values in FLIP_DATASETS.items()}
 
 
 def calculate_ranking(leaderboard_data) -> Dict[str, float]:
     # TODO [Optimization] Add caching as long as data did not change
-    recommended_metrics = _get_recommended_metrics()
+    recommended_metrics = get_recommended_metrics()
     dataset_categories = _get_dataset_categories()
 
     # Step 1: Get ranking for each dataset split by recommended metric
