@@ -31,7 +31,7 @@ def calculate_ranking(leaderboard_data) -> Dict[str, float]:
         dataset = metadata['dataset_name']
         split = metadata['split_name']
         model = metadata['model_name']
-        metric_value = entry['metrics'].get(recommended_metrics[dataset])
+        metric_value = abs(entry['metrics'].get(recommended_metrics[dataset]))
 
         if metric_value is not None:
             split_rankings[dataset][split].append((model, metric_value))
