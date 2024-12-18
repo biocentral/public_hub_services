@@ -99,5 +99,5 @@ class PLMLeaderboardDatabase:
     def import_from_yaml(self, input_path: Path):
         with open(input_path, 'r') as file:
             data = yaml.safe_load(file)
-        for entry in data:
+        for entry in data.values():
             self.add_entry(entry)
