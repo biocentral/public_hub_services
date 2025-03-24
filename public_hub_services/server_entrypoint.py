@@ -13,8 +13,8 @@ def create_app():
     app.register_blueprint(plm_leaderboard_service_route)
 
     # Setup services
-    USE_BACKUP_DATA = False
-    backup_data_path = Path("data/leaderboard-13-12-2024.yml") if USE_BACKUP_DATA else None
+    USE_BACKUP_DATA = True
+    backup_data_path = Path("data/leaderboard-backup-24-03-2025.yml") if USE_BACKUP_DATA else None
     app.config["PLM_LEADERBOARD_DATABASE"] = init_leaderboard_database_instance(backup_data=backup_data_path)
 
     return app
