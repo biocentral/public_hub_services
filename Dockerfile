@@ -7,6 +7,10 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+# Configure Git to use HTTPS instead of SSH
+RUN git config --global url."https://".insteadOf git://
+RUN git config --global url."https://github.com/".insteadOf git@github.com:
+
 # Copying and installing dependencies
 WORKDIR /app
 COPY pyproject.toml ./
@@ -33,8 +37,8 @@ ENV LOGGER_DIR=/app/logs
 RUN adduser public-services-user
 RUN chown -R public-services-user:public-services-user /app
 RUN chown -R public-services-user:public-services-user /var/log
-USER hub-user
+USER public-services-user
 
 # RUN
 ENV SERVER_DEBUG=0
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "run-public_hub_services:main"]
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "run-public_hub_services:app"]

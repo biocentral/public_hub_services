@@ -7,6 +7,8 @@ import logging
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
+from ..utils import Constants
+
 logger = logging.getLogger(__name__)
 
 
@@ -14,13 +16,12 @@ class PLMLeaderboardDatabase:
     key_delimiter = '\t'
 
     def __init__(self, backup_data: Optional[Path] = None):
-        redis_host = os.environ.get('REDIS_HOST', 'localhost')
-        redis_port = int(os.environ.get('REDIS_PORT', 6380))
+        redis_url = os.environ.get('LEADERBOARD_REDIS_URL', 'redis://localhost:6380')
 
-        self.redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        logger.info('Connecting to redis URL: {}'.format(redis_url))
+        self.redis_client = redis.from_url(redis_url, decode_responses=True)
 
-        print(self.redis_client.info())
-        self._clear_database()
+        logger.info(self.redis_client.info())
 
         if backup_data is not None:
             self._clear_database()
@@ -32,9 +33,20 @@ class PLMLeaderboardDatabase:
         else:
             raise ValueError("Unsupported file format. Use .csv, .yml, or .yaml")
 
-    def add_entry(self, entry: Dict[str, Dict[str, Any]]) -> bool:
-        # Store metadata and metrics in a hash
+    def _get_entry_id(self, entry):
         entry_id = f"{entry['modelName']}{self.key_delimiter}{entry['trainingDate']}"
+        return entry_id
+
+    def _sanity_check_entry(self, entry: Dict[str, Dict[str, Any]]) -> str:
+        NUM_EXPECTED_DATASETS = 6
+        results = entry["results"]
+        if len(results.keys()) != NUM_EXPECTED_DATASETS:
+            return f"Number of expected datasets is not {NUM_EXPECTED_DATASETS}!"
+
+        return ""
+
+    def add_entry(self, entry: Dict[str, Dict[str, Any]]) -> bool:
+        entry_id = self._get_entry_id(entry)
         self.redis_client.set(f"plm-leaderboard:{entry_id}", json.dumps(entry))
 
         # Add to set of all entries
@@ -42,12 +54,25 @@ class PLMLeaderboardDatabase:
 
         return True
 
-    def add_publishing_data(self, result: Dict[str, Any]) -> bool:
-        self.add_entry(result)
+    def add_publishing_data(self, result: Dict[str, Any]) -> str:
+        logger.info(f'Publishing data.. {result}')
 
-        # TODO Remove, only debug
-        self.export_to_yaml(output_path=Path("published.yml"))
-        return True
+        entry_id = self._get_entry_id(result)
+        existing_entry = self.get_entry(entry_id=entry_id)
+
+        if existing_entry:
+            return f"Entry with ID {entry_id} already exists"
+
+        sanity_check_error = self._sanity_check_entry(entry=result)
+        if sanity_check_error != "":
+            return sanity_check_error
+
+        if self.add_entry(result):
+            # TODO Remove, only debug
+            self.export_to_yaml(output_path=Constants.LOGGER_DIR / Path("published.yml"))
+            return ""  # Success
+
+        return "Failed to add entry to leaderboard!"
 
     def get_entry(self, entry_id: str) -> Optional[Dict[str, any]]:
         entry = self.redis_client.get(f"plm-leaderboard:{entry_id}")
