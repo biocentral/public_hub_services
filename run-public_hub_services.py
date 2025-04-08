@@ -4,11 +4,11 @@ import logging
 import argparse
 
 from public_hub_services.utils import Constants
-from public_hub_services.server_entrypoint import run_server
+from public_hub_services.server_entrypoint import create_app, run_server
 
 
 def _setup_directories():
-    required_directories = ["logs"]
+    required_directories = [Constants.LOGGER_DIR]
     for directory in required_directories:
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -38,16 +38,15 @@ def _setup_logging():
     logging.captureWarnings(True)
 
 
+_setup_directories()
+_setup_logging()
+
+app = create_app()
+
 def main():
     parser = argparse.ArgumentParser(description='Biocentral hub server')
-
     args = parser.parse_args()
-
-    _setup_directories()
-    _setup_logging()
-
     run_server()
-
 
 if __name__ == '__main__':
     main()

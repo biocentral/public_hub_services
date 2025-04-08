@@ -1,14 +1,13 @@
 # Gunicorn configuration file
-import multiprocessing
 
 # Number of worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 2
 
 # Number of threads per worker
 threads = 2
 
 # Bind address
-bind = "0.0.0.0:5001"
+bind = "0.0.0.0:12999"
 
 # Timeout
 timeout = 30
@@ -16,11 +15,11 @@ timeout = 30
 # Access log - records incoming HTTP requests
 accesslog = "/var/log/gunicorn.access.log"
 
-# Error log - records Gunicorn server goings-on
+# Error log - records Gunicorn server going-ons
 errorlog = "/var/log/gunicorn.error.log"
 
 # Whether to send Flask output to the error log
 capture_output = True
 
 # How verbose the Gunicorn error logs should be
-loglevel = "info"
+loglevel = "debug"
